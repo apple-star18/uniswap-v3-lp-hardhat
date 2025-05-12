@@ -14,7 +14,6 @@ contract ProvideLiquidity {
 
     INonfungiblePositionManager public immutable positionManager;
 
-    // Struct로 관련 변수들을 그룹화하여 스택 사용량을 줄임
     struct PoolData {
         address token0;
         address token1;
