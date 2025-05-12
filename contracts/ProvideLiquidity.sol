@@ -37,7 +37,7 @@ contract ProvideLiquidity {
     ) external {
         PoolData memory data;
 
-        // ------ Uniswap V3 풀에서 데이터 조회 ------
+        // ------ Retrieving data from Uniswap V3 Pool ------
         IUniswapV3Pool uniswapPool = IUniswapV3Pool(pool);
         data.token0 = uniswapPool.token0();
         data.token1 = uniswapPool.token1();
@@ -50,14 +50,14 @@ contract ProvideLiquidity {
         data.lowerTick = TickUtils.getTickAtSqrtRatio(data.lowerSqrtPrice);
         data.upperTick = TickUtils.getTickAtSqrtRatio(data.upperSqrtPrice);
 
-        // ------ 토큰 전송 및 승인 ------
+        // ------ token transfer and approve ------
         TransferHelper.safeTransferFrom(data.token0, msg.sender, address(this), amount0);
         TransferHelper.safeTransferFrom(data.token1, msg.sender, address(this), amount1);
 
         TransferHelper.safeApprove(data.token0, address(positionManager), amount0);
         TransferHelper.safeApprove(data.token1, address(positionManager), amount1);
 
-        // ------ 포지션 민팅 ------
+        // ------ position minting ------
         INonfungiblePositionManager.MintParams memory params = INonfungiblePositionManager.MintParams({
             token0: data.token0,
             token1: data.token1,
@@ -74,7 +74,7 @@ contract ProvideLiquidity {
 
         (uint256 tokenId, uint256 liquidity, uint256 amount0Used, uint256 amount1Used) = positionManager.mint(params);
 
-        // ------ 잔여 토큰 환불 ------
+        // ------ return surplus assets ------
         if (amount0Used < amount0) {
             TransferHelper.safeTransfer(data.token0, msg.sender, (amount0 - amount0Used));
         }
