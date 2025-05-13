@@ -4,15 +4,25 @@ pragma abicoder v2;
 
 import "@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 import "./utils/TransferHelper.sol";
 import "./utils/PriceCalculator.sol";
 import "./utils/TickUtils.sol";
+import "hardhat/console.sol";
 
 contract ProvideLiquidity {
     using PriceCalculator for uint256;
 
     INonfungiblePositionManager public immutable positionManager;
+
+    event LiquidityProvided(
+        address indexed user,
+        uint256 tokenId,
+        uint256 liquidity,
+        uint256 amount0Used,
+        uint256 amount1Used
+    );
 
     struct PoolData {
         address token0;
@@ -34,6 +44,12 @@ contract ProvideLiquidity {
         uint256 amount1,
         uint16 widthBps
     ) external {
+        console.log("amount0:", amount0);
+        console.log("amount1:", amount1);
+
+        require(amount0 > 0 && amount1 > 0, "Amounts must be > 0");
+        require(widthBps > 0 && widthBps <= 10000, "widthBps too large");
+
         PoolData memory data;
 
         // ------ Retrieving data from Uniswap V3 Pool ------
@@ -42,10 +58,8 @@ contract ProvideLiquidity {
         data.token1 = uniswapPool.token1();
         (data.sqrtPriceX96,,,,,,) = uniswapPool.slot0();
 
-        // Calculate price range based on widthBps
+         // ------ Calculate Price Range ------
         (data.lowerSqrtPrice, data.upperSqrtPrice) = PriceCalculator.calculatePriceRange(data.sqrtPriceX96, widthBps);
-
-        // Convert price range to ticks
         data.lowerTick = TickUtils.getTickAtSqrtRatio(data.lowerSqrtPrice);
         data.upperTick = TickUtils.getTickAtSqrtRatio(data.upperSqrtPrice);
 
@@ -80,5 +94,8 @@ contract ProvideLiquidity {
         if (amount1Used < amount1) {
             TransferHelper.safeTransfer(data.token1, msg.sender, (amount1 - amount1Used));
         }
+
+        // ------ Emit Event ------
+        emit LiquidityProvided(msg.sender, tokenId, liquidity, amount0Used, amount1Used);
     }
 }
