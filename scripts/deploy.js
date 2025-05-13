@@ -17,8 +17,7 @@ async function main() {
     const PriceCalculator = await ethers.getContractFactory("PriceCalculator");
     const priceCalculatorLib = await PriceCalculator.deploy();
     await priceCalculatorLib.waitForDeployment();
-    // const receipt = await priceCalculatorLib.deployTransaction.wait();
-    // const priceCalculatorAddress = receipt.contractAddress;
+
     console.log("PriceCalculator deployed at:", priceCalculatorLib.target);
 
     // Connect PriceCalculator to ProvideLiquidity contract and deploy

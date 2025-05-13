@@ -40,7 +40,7 @@ describe("ProvideLiquidity Contract", function () {
             ethers.parseEther("10"),
             ethers.parseEther("10"),
             100
-        )).to.be.revertedWith("TransferFrom failed"); // 또는 custom revert
+        )).to.be.revertedWith("TransferFrom failed"); 
     });
 
     it("Should revert with 'Amounts must be > 0'", async function () {
