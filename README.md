@@ -37,6 +37,7 @@ POSITION_MANAGER address output by this script.
 Export the address from the previous step:
 
 In the project directory, create a file named .env(no filename, just .env).
+
 Add environment variable to .env like this:
 
 POSITION_MANAGER=<ADDRESS_FROM_ABOVE>
